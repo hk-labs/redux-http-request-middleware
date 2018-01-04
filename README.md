@@ -7,16 +7,30 @@
 NPM:
 
 ```bash
-$ npm install electron-event-dispatcher
+$ npm install redux-http-request-middleware --save
 ```
 
 Yarn:
 
 ```bash
-$ yarn add electron-event-dispatcher
+$ yarn add redux-http-request-middleware
 ```
 
-## Usage
+## Usage Example
+
+```js
+import { applyMiddleware, createStore } from 'redux';
+import { httpRequestMiddleware } from 'redux-http-request-middleware';
+
+import reducer from './reducers';
+
+const store = createStore(
+  reducer,
+  applyMiddleware(httpRequestMiddleware())
+);
+
+// render the application
+```
 
 
 ## API
@@ -24,7 +38,7 @@ $ yarn add electron-event-dispatcher
 
 ## Contributing
 
-Feel free to dive in! [Open an issue](https://github.com/hk-labs/electron-event-dispatcher/issues/new) or submit PRs.
+Feel free to dive in! [Open an issue](https://github.com/hk-labs/redux-http-request-middleware/issues/new) or submit PRs.
 
 
 ## Running tests
