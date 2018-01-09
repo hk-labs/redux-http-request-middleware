@@ -15,6 +15,13 @@ export const HTTP_REQUEST = Symbol('HTTP_REQUEST');
 export const HTTP_RESPONSE = Symbol('HTTP_RESPONSE');
 
 /**
+ * The internally used `$PROMISE` symbol.
+ *
+ * @type {symbol}
+ */
+export const $PROMISE = Symbol('$PROMISE');
+
+/**
  * Http request methods (verbs).
  */
 export const METHOD_GET     = 'get';
@@ -74,33 +81,36 @@ function request(options, payload) {
  * }} action
  */
 function response(handler, params) {
+  let action;
+
   switch (typeof handler) {
     case 'function':
-      if (params.error) {
-        return handler(params.error, params.payload, params.response);
-      } else {
-        return handler(params.payload, params.response);
-      }
+      action = params.error
+        ? handler(params.error, params.payload, params.response)
+        : handler(params.payload, params.response);
 
-    case 'object': {
-      const action = { ...handler };
+      break;
+
+    case 'object':
+      action = { ...handler };
       params.error && (action.error = params.error.message);
       params.payload && (action.payload = params.payload);
       params.response && (action[HTTP_RESPONSE] = params.response);
-      return action;
-    }
+      break;
 
     case 'string': {
-      const action = { type: handler };
+      action = { type: handler };
       params.error && (action.error = params.error.message);
       params.payload && (action.payload = params.payload);
       params.response && (action[HTTP_RESPONSE] = params.response);
-      return action;
+      break;
     }
 
     default:
       throw new Error(`unable to create response action from "${JSON.stringify(handler)}"`);
   }
+
+  return action;
 }
 
 /**
@@ -110,7 +120,9 @@ function response(handler, params) {
  * @param {superagent} [options.agent] – preconfigured `superagent` instance
  * @param {Object} [options.defaultHeaders] – default headers
  */
-export function httpRequestMiddleware(options = {}) {
+export function httpRequestMiddleware(options) {
+  options || (options = {});
+
   return store => next => action => {
     const httpRequestPayload = action[HTTP_REQUEST];
 
@@ -120,7 +132,7 @@ export function httpRequestMiddleware(options = {}) {
 
     const {handlers = {}} = httpRequestPayload;
 
-    httpRequestPayload.$promise = request(options, httpRequestPayload)
+    action[$PROMISE] = request(options, httpRequestPayload)
       .then((res) => {
         if (handlers[res.status]) {
           return store.dispatch(response(handlers[res.status], {
@@ -154,6 +166,8 @@ export function httpRequestMiddleware(options = {}) {
         throw err;
       });
 
-    return next(action);
+    next(action);
+
+    return action[$PROMISE];
   };
 }
