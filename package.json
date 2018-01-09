@@ -24,6 +24,7 @@
   "main": "dist/lib/index.js",
   "module": "dist/es/index.js",
   "jsnext:main": "dist/es/index.js",
+  "unpkg": "dist/umd/index.min.js",
   "files": [
     "dist/"
   ],
@@ -40,6 +41,7 @@
     "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "superagent": "^3.8.2"
   },
   "devDependencies": {
@@ -49,6 +51,7 @@
     "babel-loader": "^7.1.2",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
@@ -56,7 +59,7 @@
     "chai": "^4.1.2",
     "codecov": "^3.0.0",
     "cross-env": "^5.1.3",
-    "eslint": "^4.14.0",
+    "eslint": "^4.15.0",
     "eslint-config-react-app": "^2.0.1",
     "eslint-plugin-flowtype": "^2.40.1",
     "eslint-plugin-import": "^2.8.0",
@@ -71,13 +74,14 @@
     "redux": "^3.7.2",
     "redux-mock-store": "^1.4.0",
     "rimraf": "^2.6.2",
-    "rollup": "^0.53.2",
+    "rollup": "^0.53.3",
     "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-prettier": "^0.4.0",
     "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-uglify": "^2.0.1",
-    "sinon": "^4.1.3",
+    "sinon": "^4.1.4",
     "sinon-chai": "^2.14.0"
   },
   "author": "Dan Kerimdzhanov",

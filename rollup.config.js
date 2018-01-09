@@ -1,5 +1,6 @@
 import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import nodeResolve from 'rollup-plugin-node-resolve';
 import prettier from 'rollup-plugin-prettier';
 import replace from 'rollup-plugin-replace';
 import uglify from 'rollup-plugin-uglify';
@@ -21,7 +22,7 @@ if (NODE_ENV === 'es' || NODE_ENV === 'cjs') {
   config.output.format = NODE_ENV;
   config.plugins.push(
     babel({
-      plugins: ['external-helpers']
+      runtimeHelpers: true
     }),
     prettier({
       tabWidth: 2,
@@ -35,14 +36,15 @@ if (NODE_ENV === 'development' || NODE_ENV === 'production') {
   config.output.format = 'umd';
   config.output.name = 'ReduxHttpRequestMiddleware';
   config.plugins.push(
-    resolve({
-      jsnext: true
+    nodeResolve({
+      jsnext: true,
+      main: true
     }),
     babel({
       exclude: 'node_modules/**',
-      plugins: ['external-helpers'],
-      externalHelpers: true
+      runtimeHelpers: true
     }),
+    commonjs(),
     replace({
       'process.env.NODE_ENV': JSON.stringify(NODE_ENV)
     })
