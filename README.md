@@ -1,6 +1,13 @@
 # Redux Http Request Middleware
 
-> todo: write a great readme!
+[![Build Status](https://travis-ci.org/hk-labs/redux-http-request-middleware.svg?branch=master)](https://travis-ci.org/hk-labs/redux-http-request-middleware)
+[![npm version](https://badge.fury.io/js/redux-http-request-middleware.svg)](https://badge.fury.io/js/redux-http-request-middleware)
+[![dependencies Status](https://david-dm.org/hk-labs/redux-http-request-middleware/status.svg)](https://david-dm.org/hk-labs/redux-http-request-middleware)
+
+The concept of this library is that you can define your own redux actions with any type and payload attaching the http request ability using the `HTTP_REQUEST` field.
+
+Technically, when dispatching the action charged with `HTTP_REQUEST`, the middleware sends the http request eventually dispatching the response (success/failure) handler.
+Additionally, dispatching this actions returns promises which makes it friendly with libs like [Redux Form](https://github.com/erikras/redux-form) and [Redux Saga](https://github.com/redux-saga/redux-saga) and makes possible the "server-side rendering".
 
 
 ## Installation
@@ -17,10 +24,9 @@ Using Yarn:
 $ yarn add redux-http-request-middleware
 ```
 
+## Basic setup
 
-## Usage Example
-
-In your initialization file:
+Register the `httpRequestMiddleware` in your redux store configuration:
 
 _i.e. `src/index.js` or `src/redux/index.js`_
 
@@ -28,17 +34,27 @@ _i.e. `src/index.js` or `src/redux/index.js`_
 import { applyMiddleware, createStore } from 'redux';
 import { httpRequestMiddleware } from 'redux-http-request-middleware';
 
-import reducer from './reducers';
+import rootReducer from './reducers';
+
+const httpRequestOptions = { // optional configuration
+  defaultHeaders: {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  }
+};
 
 const store = createStore(
-  reducer,
-  applyMiddleware(httpRequestMiddleware())
+  rootReducer,
+  applyMiddleware(
+    httpRequestMiddleware(httpRequestOptions)
+  )
 );
-
-// render the application
 ```
 
-Now you can attach http request to your redux actions like this:
+## Usage example
+
+The library keeps declarative programming style (as react/redux are), no callback hell, just define a pure actions.
 
 _i.e `src/redux/actions/auth.js`:_
 
@@ -60,20 +76,16 @@ const login = (email, password) => ({
         type: 'LOGIN_SUCCESS',
         payload: result
       }),
-      [401]: (result) => ({ // the action will be dispatched on response with status code 401 "Unauthorized"
+      failure: (error) => ({ // the action that will be dispatched if request failures
         type: 'LOGIN_FAILURE',
-        message: 'Invalid credentials'
-      }).
-      failure: (err) => ({ // the action that will be dispatched if request failures
-        type: 'LOGIN_FAILURE',
-        message: `Error: ${err.message}`
+        message: `Error: ${error.message}`
       })
     }
   }
 });
 ```
 
-And then dispatch the action from your components/sagas/etc...
+And then dispatch your actions from your components/sagas/etc...
 
 _i.e. `src/components/LoginForm.js`_
 
@@ -105,7 +117,14 @@ export default connect(mapStateToProps)(LoginForm);
 ```
 
 
-## API
+## Documentation
+
+> todo...
+
+
+## API Reference
+
+> todo...
 
 
 ## Contributing
