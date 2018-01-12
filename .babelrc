@@ -11,5 +11,16 @@
   ],
   "plugins": [
     "transform-runtime"
-  ]
+  ],
+  "env": {
+    "test": {
+      "presets": [
+        ["env", {
+          "target": {
+            "node": "current"
+          }
+        }]
+      ]
+    }
+  }
 }

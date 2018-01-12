@@ -31,7 +31,7 @@
   "scripts": {
     "clean": "rimraf .nyc_output dist coverage",
     "lint": "eslint src test",
-    "test": "cross-env BABEL_ENV=commonjs NODE_ENV=test mocha test/*.spec.js",
+    "test": "cross-env NODE_ENV=test mocha test/*.spec.js",
     "test:cov": "cross-env NODE_ENV=test nyc npm test",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "build:commonjs": "cross-env NODE_ENV=cjs rollup -c -o dist/lib/index.js",
