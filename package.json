@@ -26,7 +26,8 @@
   "jsnext:main": "dist/es/http-request-middleware.js",
   "unpkg": "dist/umd/http-request-middleware.min.js",
   "files": [
-    "dist/"
+    "dist/",
+    "src/"
   ],
   "scripts": {
     "clean": "rimraf .nyc_output dist coverage",
