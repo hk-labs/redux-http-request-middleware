@@ -4,7 +4,7 @@ import configureStore from './redux-store.mock';
 import {
   HTTP_REQUEST,
   httpRequestMiddleware
-} from '../src';
+} from '../src/http-request-middleware';
 
 const requestSuccess = (payload = {}) => ({
   type: 'test:request_success',

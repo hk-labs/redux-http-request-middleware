@@ -9,7 +9,7 @@ import {
   METHOD_PATCH,
   METHOD_DELETE,
   httpRequestMiddleware
-} from '../src';
+} from '../src/http-request-middleware';
 
 const requestSuccess = (payload = {}) => ({
   type: 'test:request_success',

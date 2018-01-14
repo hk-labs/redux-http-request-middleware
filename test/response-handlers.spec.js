@@ -21,7 +21,7 @@ import {
   HTTP_REQUEST,
   HTTP_RESPONSE,
   httpRequestMiddleware
-} from '../src';
+} from '../src/http-request-middleware';
 
 const requestSuccess = (payload = {}, response) => ({
   type: 'test:request_success',

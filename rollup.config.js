@@ -8,7 +8,7 @@ import uglify from 'rollup-plugin-uglify';
 const {NODE_ENV} = process.env;
 
 const config = {
-  input: 'src/index.js',
+  input: 'src/http-request-middleware.js',
   plugins: [],
   external: ['superagent'],
   output: {
@@ -29,7 +29,7 @@ if (NODE_ENV === 'es' || NODE_ENV === 'cjs') {
       singleQuote: true,
       sourceMap: true
     })
-  )
+  );
 }
 
 if (NODE_ENV === 'development' || NODE_ENV === 'production') {
@@ -48,7 +48,7 @@ if (NODE_ENV === 'development' || NODE_ENV === 'production') {
     replace({
       'process.env.NODE_ENV': JSON.stringify(NODE_ENV)
     })
-  )
+  );
 }
 
 if (NODE_ENV === 'production') {

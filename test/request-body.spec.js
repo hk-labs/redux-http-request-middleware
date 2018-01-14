@@ -5,7 +5,7 @@ import {
   HTTP_REQUEST,
   METHOD_POST,
   httpRequestMiddleware
-} from '../src';
+} from '../src/http-request-middleware';
 
 const requestSuccess = (payload = {}) => ({
   type: 'test:request_success',

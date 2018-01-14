@@ -21,10 +21,10 @@
   "bugs": {
     "url": "https://github.com/hk-labs/redux-http-request-middleware/issues"
   },
-  "main": "dist/lib/index.js",
-  "module": "dist/es/index.js",
-  "jsnext:main": "dist/es/index.js",
-  "unpkg": "dist/umd/index.min.js",
+  "main": "dist/lib/http-request-middleware.js",
+  "module": "dist/es/http-request-middleware.js",
+  "jsnext:main": "dist/es/http-request-middleware.js",
+  "unpkg": "dist/umd/http-request-middleware.min.js",
   "files": [
     "dist/"
   ],
@@ -34,10 +34,10 @@
     "test": "cross-env NODE_ENV=test mocha test/*.spec.js",
     "test:cov": "cross-env NODE_ENV=test nyc npm test",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "build:commonjs": "cross-env NODE_ENV=cjs rollup -c -o dist/lib/index.js",
-    "build:es": "cross-env BABEL_ENV=es NODE_ENV=es rollup -c -o dist/es/index.js",
-    "build:umd": "cross-env BABEL_ENV=es NODE_ENV=development rollup -c -o dist/umd/index.js",
-    "build:umd:min": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c -o dist/umd/index.min.js",
+    "build:commonjs": "cross-env NODE_ENV=cjs rollup -c -o dist/lib/http-request-middleware.js",
+    "build:es": "cross-env BABEL_ENV=es NODE_ENV=es rollup -c -o dist/es/http-request-middleware.js",
+    "build:umd": "cross-env BABEL_ENV=es NODE_ENV=development rollup -c -o dist/umd/http-request-middleware.js",
+    "build:umd:min": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c -o dist/umd/http-request-middleware.min.js",
     "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
