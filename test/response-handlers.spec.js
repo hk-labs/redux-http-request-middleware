@@ -36,8 +36,12 @@ const requestFailure = (err, payload = {}, response) => ({
   [HTTP_RESPONSE]: response
 });
 
+const throwUnexpectedSuccess = () => {
+  throw new Error('unexpected promise resolve, an error should have been occurred');
+};
+
 describe('Response Handlers', () => {
-  let mockStore, store;
+  let mockStore, $store;
 
   before(() => nock.disableNetConnect());
   after(() => nock.enableNetConnect());
@@ -49,8 +53,8 @@ describe('Response Handlers', () => {
     ]);
   });
 
-  beforeEach('setup store instance', () => {
-    store = mockStore({});
+  beforeEach('setup `$store` instance', () => {
+    $store = mockStore({});
   });
 
   describe('generic case handlers (success/failure)', () => {
@@ -88,59 +92,41 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches an action with a specified `type` providing the response body as a `payload`',
-          (done) => {
-            store.expect([
-              request,
-              {
+        it('dispatches an action with a specified `type` providing the response body as a `payload`', () => {
+          return $store.dispatch(request)
+            .then(() => {
+              const [first, second] = $store.getActions();
+
+              expect(first).to.deep.equal(request);
+
+              expect(second).to.deep.equal({
                 type: 'test:request_success',
                 payload: {
                   string: 'abcdefg',
-                  number:  1234.56,
-                  boolean: true
-                }
-              }
-            ], err => done(err));
-
-            store.dispatch(request);
-          });
-
-        it('attaches the original response object as `[HTTP_RESPONSE]`', (done) => {
-          const actions = [
-            request,
-            {
-              type: 'test:request_success',
-              payload: {
-                string: 'abcdefg',
-                number:  1234.56,
-                boolean: true
-              }
-            }
-          ];
-
-          store.expect(actions, (err) => {
-            if (err) {
-              return done(err);
-            }
-
-            const dispatched = store.getActions();
-            const action = dispatched[dispatched.length - 1];
-
-            expect(action)
-              .to.have.property(HTTP_RESPONSE)
-              .that.deep.includes({
-                status: 200,
-                body: {
-                  string: 'abcdefg',
-                  number:  1234.56,
+                  number: 1234.56,
                   boolean: true
                 }
               });
+            });
+        });
 
-            done();
-          });
+        it('attaches the original response object as `[HTTP_RESPONSE]`', () => {
+          return $store.dispatch(request)
+            .then(() => {
+              const [_, second] = $store.getActions();
 
-          store.dispatch(request);
+              //noinspection JSCheckFunctionSignatures
+              expect(second)
+                .to.have.property(HTTP_RESPONSE)
+                .that.deep.includes({
+                  status: 200,
+                  body: {
+                    string: 'abcdefg',
+                    number:  1234.56,
+                    boolean: true
+                  }
+              });
+            });
         });
       });
 
@@ -155,11 +141,14 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given action providing the response body as a `payload`',
-          (done) => {
-            store.expect([
-              request,
-              {
+        it('dispatches the given action providing the response body as a `payload`', () => {
+          return $store.dispatch(request)
+            .then(() => {
+              const [first, second] = $store.getActions();
+
+              expect(first).to.deep.equal(request);
+
+              expect(second).to.deep.equal({
                 type: 'test:request_success',
                 custom: 'custom field value',
                 payload: {
@@ -167,49 +156,27 @@ describe('Response Handlers', () => {
                   number:  1234.56,
                   boolean: true
                 }
-              }
-            ], err => done(err));
-
-            store.dispatch(request);
-          });
-
-        it('attaches the original response object as `[HTTP_RESPONSE]`', (done) => {
-          const actions = [
-            request,
-            {
-              type: 'test:request_success',
-              custom: 'custom field value',
-              payload: {
-                string: 'abcdefg',
-                number:  1234.56,
-                boolean: true
-              }
-            }
-          ];
-
-          store.expect(actions, (err) => {
-            if (err) {
-              return done(err);
-            }
-
-            const dispatched = store.getActions();
-            const action = dispatched[dispatched.length - 1];
-
-            expect(action)
-              .to.have.property(HTTP_RESPONSE)
-              .that.deep.includes({
-                status: 200,
-                body: {
-                  string: 'abcdefg',
-                  number:  1234.56,
-                  boolean: true
-                }
               });
-
-            done();
+            });
           });
 
-          store.dispatch(request);
+        it('attaches the original response object as `[HTTP_RESPONSE]`', () => {
+          return $store.dispatch(request)
+            .then(() => {
+              const [_, second] = $store.getActions();
+
+              //noinspection JSCheckFunctionSignatures
+              expect(second)
+                .to.have.property(HTTP_RESPONSE)
+                .that.deep.includes({
+                  status: 200,
+                  body: {
+                    string: 'abcdefg',
+                    number:  1234.56,
+                    boolean: true
+                  }
+                });
+            });
         });
       });
 
@@ -221,68 +188,41 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given handler as an action creator providing the response body as a `payload`',
-          (done) => {
-            const actions = [
-              request,
-              requestSuccess({
+        it('dispatches the given handler as an action creator providing the response body', () => {
+          const {success} = request[HTTP_REQUEST].handlers;
+
+          return $store.dispatch(request)
+            .then(() => {
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
+
+              expect(success).to.have.been.called;
+
+              expect(second).to.deep.equal(requestSuccess({
                 string: 'abcdefg',
                 number:  1234.56,
                 boolean: true
-              })
-            ];
-
-            store.expect(actions, (err) => {
-              if (err) {
-                return done(err);
-              }
-
-              try {
-                expect(request[HTTP_REQUEST].handlers.success).to.have.been.called;
-              }
-              catch (err) {
-                return done(err);
-              }
-
-              done();
+              }));
             });
-
-            store.dispatch(request);
           });
 
-        it('additionally provides the response object as a second argument', (done) => {
-          const actions = [
-            request,
-            requestSuccess({
-              string: 'abcdefg',
-              number:  1234.56,
-              boolean: true
-            })
-          ];
+        it('additionally provides the original response object as a second argument', () => {
+          return $store.dispatch(request)
+            .then(() => {
+              const [_, second] = $store.getActions();
 
-          store.expect(actions, (err) => {
-            if (err) {
-              return done(err);
-            }
-
-            const dispatched = store.getActions();
-            const action = dispatched[dispatched.length - 1];
-
-            expect(action)
-              .to.have.property(HTTP_RESPONSE)
-              .that.deep.includes({
-                status: 200,
-                body: {
-                  string: 'abcdefg',
-                  number:  1234.56,
-                  boolean: true
-                }
-              });
-
-            done();
-          });
-
-          store.dispatch(request);
+              //noinspection JSCheckFunctionSignatures
+              expect(second)
+                .to.have.property(HTTP_RESPONSE)
+                .that.deep.includes({
+                  status: 200,
+                  body: {
+                    string: 'abcdefg',
+                    number:  1234.56,
+                    boolean: true
+                  }
+                });
+            });
         });
       });
     });
@@ -306,11 +246,18 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches an action with a specified `type` providing the occurred `error` and `payload`',
-          (done) => {
-            store.expect([
-              request,
-              {
+        it('dispatches an action with a specified `type` providing the occurred `error` and `payload`', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.status !== 422) {
+                throw err;
+              }
+
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
+
+              expect(second).to.deep.include({
                 type: 'test:request_failure',
                 error: 'Unprocessable Entity',
                 payload: {
@@ -318,49 +265,32 @@ describe('Response Handlers', () => {
                     email: 'This email is already registered'
                   }
                 }
-              }
-            ], err => done(err));
-
-            store.dispatch(request);
-          });
-
-        it('attaches the original response object as `[HTTP_RESPONSE]`', (done) => {
-          const actions = [
-            request,
-            {
-              type: 'test:request_failure',
-              error: 'Unprocessable Entity',
-              payload: {
-                errors: {
-                  email: 'This email is already registered'
-                }
-              }
-            }
-          ];
-
-          store.expect(actions, (err) => {
-            if (err) {
-              return done(err);
-            }
-
-            const dispatched = store.getActions();
-            const action = dispatched[dispatched.length - 1];
-
-            expect(action)
-              .to.have.property(HTTP_RESPONSE)
-              .that.deep.includes({
-                status: 422,
-                body: {
-                  errors: {
-                    email: 'This email is already registered'
-                  }
-                }
               });
+            });
+        });
 
-            done();
-          });
+        it('attaches the original response object as `[HTTP_RESPONSE]`', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.status !== 422) {
+                throw err;
+              }
 
-          store.dispatch(request);
+              const [_, second] = $store.getActions();
+
+              //noinspection JSCheckFunctionSignatures
+              expect(second)
+                .to.have.property(HTTP_RESPONSE)
+                .that.deep.includes({
+                  status: 422,
+                  body: {
+                    errors: {
+                      email: 'This email is already registered'
+                    }
+                  }
+                });
+            });
         });
       });
 
@@ -375,11 +305,18 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given action providing the occurred `error` and `payload`',
-          (done) => {
-            store.expect([
-              request,
-              {
+        it('dispatches the given action providing the occurred `error` and `payload`', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.status !== 422) {
+                throw err;
+              }
+
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
+
+              expect(second).to.deep.include({
                 type: 'test:request_failure',
                 custom: 'custom field value',
                 error: 'Unprocessable Entity',
@@ -388,50 +325,32 @@ describe('Response Handlers', () => {
                     email: 'This email is already registered'
                   }
                 }
-              }
-            ], err => done(err));
-
-            store.dispatch(request);
-          });
-
-        it('attaches the original response object as `[HTTP_RESPONSE]`', (done) => {
-          const actions = [
-            request,
-            {
-              type: 'test:request_failure',
-              custom: 'custom field value',
-              error: 'Unprocessable Entity',
-              payload: {
-                errors: {
-                  email: 'This email is already registered'
-                }
-              }
-            }
-          ];
-
-          store.expect(actions, (err) => {
-            if (err) {
-              return done(err);
-            }
-
-            const dispatched = store.getActions();
-            const action = dispatched[dispatched.length - 1];
-
-            expect(action)
-              .to.have.property(HTTP_RESPONSE)
-              .that.deep.includes({
-                status: 422,
-                body: {
-                  errors: {
-                    email: 'This email is already registered'
-                  }
-                }
               });
+            });
+        });
 
-            done();
-          });
+        it('attaches the original response object as `[HTTP_RESPONSE]`', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.status !== 422) {
+                throw err;
+              }
 
-          store.dispatch(request);
+              const [_, second] = $store.getActions();
+
+              //noinspection JSCheckFunctionSignatures
+              expect(second)
+                .to.have.property(HTTP_RESPONSE)
+                .that.deep.includes({
+                  status: 422,
+                  body: {
+                    errors: {
+                      email: 'This email is already registered'
+                    }
+                  }
+                });
+            });
         });
       });
 
@@ -443,73 +362,58 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given handler as an action creator providing the occurred `error` and `payload`',
-          (done) => {
-            const actions = [
-              request,
-              requestFailure(new Error('Unprocessable Entity'), {
-                errors: {
-                  email: 'This email is already registered'
-                }
-              })
-            ];
+        it('dispatches the given handler as an action creator providing the occurred `error` and `payload`', () => {
+          const {failure} = request[HTTP_REQUEST].handlers;
 
-            store.expect(actions, (err) => {
-              if (err) {
-                return done(err);
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.status !== 422) {
+                throw err;
               }
 
-              try {
-                expect(request[HTTP_REQUEST].handlers.failure).to.have.been.called;
-              }
-              catch (err) {
-                return done(err);
-              }
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
 
-              done();
-            });
+              expect(failure).to.have.been.called;
 
-            store.dispatch(request);
-          });
-
-        it('additionally provides the response object as a third argument', (done) => {
-          const actions = [
-            request,
-            requestFailure(new Error('Unprocessable Entity'), {
-              errors: {
-                email: 'This email is already registered'
-              }
-            })
-          ];
-
-          store.expect(actions, (err) => {
-            if (err) {
-              return done(err);
-            }
-
-            const dispatched = store.getActions();
-            const action = dispatched[dispatched.length - 1];
-
-            expect(action)
-              .to.have.property(HTTP_RESPONSE)
-              .that.deep.includes({
-                status: 422,
-                body: {
+              expect(second).to.deep.include(
+                requestFailure(new Error('Unprocessable Entity'), {
                   errors: {
                     email: 'This email is already registered'
                   }
-                }
-              });
+                })
+              );
+            });
+        });
 
-            done();
-          });
+        it('additionally provides the original response object as a third argument', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.status !== 422) {
+                throw err;
+              }
 
-          store.dispatch(request);
+              const [_, second] = $store.getActions();
+
+              //noinspection JSCheckFunctionSignatures
+              expect(second)
+                .to.have.property(HTTP_RESPONSE)
+                .that.deep.includes({
+                  status: 422,
+                  body: {
+                    errors: {
+                      email: 'This email is already registered'
+                    }
+                  }
+                });
+            });
         });
       });
     });
 
-    describe('if request failures', () => {
+    describe('if the requesting is failed', () => {
       beforeEach('mock request error', () => {
         nock('http://localhost')
           .get('/api/test')
@@ -524,18 +428,23 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given handler as an action `type` providing the occurred `error`',
-          (done) => {
-            store.expect([
-              request,
-              {
+        it('dispatches the given handler as an action `type` providing the occurred `error`', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.message !== 'Network Error') {
+                throw err;
+              }
+
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
+
+              expect(second).to.deep.include({
                 type: 'test:request_failure',
                 error: 'Network Error'
-              }
-            ], err => done(err));
-
-            store.dispatch(request);
-          });
+              });
+            });
+        });
       });
 
       describe('when the given `failure` handler is an object (action)', () => {
@@ -549,17 +458,23 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given handler as an object providing the occurred `error`', (done) => {
-          store.expect([
-            request,
-            {
-              type: 'test:request_failure',
-              custom: 'custom field value',
-              error: 'Network Error'
-            }
-          ], err => done(err));
+        it('dispatches the given handler as an object providing the occurred `error`', () => {
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.message !== 'Network Error') {
+                throw err;
+              }
 
-          store.dispatch(request);
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
+
+              expect(second).to.deep.include({
+                type: 'test:request_failure',
+                custom: 'custom field value',
+                error: 'Network Error'
+              });
+            });
         });
       });
 
@@ -571,30 +486,25 @@ describe('Response Handlers', () => {
           };
         });
 
-        it('dispatches the given handler as an action creator' +
-          ' providing the occurred `error` as a first argument',
-          (done) => {
-            const actions = [
-              request,
-              requestFailure(new Error('Network Error'))
-            ];
+        it('dispatches the given handler as an action creator providing the occurred `error`', () => {
+          const {failure} = request[HTTP_REQUEST].handlers;
 
-            store.expect(actions, (err) => {
-              if (err) {
-                return done(err);
+          return $store.dispatch(request)
+            .then(throwUnexpectedSuccess)
+            .catch((err) => {
+              if (err.message !== 'Network Error') {
+                throw err;
               }
 
-              try {
-                expect(request[HTTP_REQUEST].handlers.failure).to.have.been.called;
-              }
-              catch (err) {
-                return done(err);
-              }
+              const [first, second] = $store.getActions();
+              expect(first).to.deep.equal(request);
 
-              done();
+              expect(failure).to.have.been.called;
+
+              expect(second).to.deep.include(
+                requestFailure(new Error('Network Error'))
+              );
             });
-
-            store.dispatch(request);
           });
       });
     });
@@ -649,7 +559,7 @@ describe('Response Handlers', () => {
 
             it('dispatches an action with a specified `type` providing the response body as a `payload`',
               (done) => {
-                store.expect([
+                $store.expect([
                   request,
                   {
                     type: `test:status_${status}_handler`,
@@ -661,8 +571,9 @@ describe('Response Handlers', () => {
                   }
                 ], err => done(err));
 
-                store.dispatch(request);
-              });
+              $store.dispatch(request)
+                .catch(() => {/* prevent console warnings */});
+            });
 
             it('attaches the original response object as `[HTTP_RESPONSE]`', (done) => {
               const actions = [
@@ -677,14 +588,15 @@ describe('Response Handlers', () => {
                 }
               ];
 
-              store.expect(actions, (err) => {
+              $store.expect(actions, (err) => {
                 if (err) {
                   return done(err);
                 }
 
-                const dispatched = store.getActions();
+                const dispatched = $store.getActions();
                 const action = dispatched[dispatched.length - 1];
 
+                //noinspection JSCheckFunctionSignatures
                 expect(action)
                   .to.have.property(HTTP_RESPONSE)
                   .that.deep.includes({
@@ -699,7 +611,8 @@ describe('Response Handlers', () => {
                 done();
               });
 
-              store.dispatch(request);
+              $store.dispatch(request)
+                .catch(() => {/* prevent console warnings */});
             });
           });
 
@@ -712,7 +625,7 @@ describe('Response Handlers', () => {
             });
 
             it('dispatches the given action providing the response body as a `payload`', (done) => {
-              store.expect([
+              $store.expect([
                 request,
                 {
                   type: `test:status_${status}_handler`,
@@ -725,7 +638,8 @@ describe('Response Handlers', () => {
                 }
               ], err => done(err));
 
-              store.dispatch(request);
+              $store.dispatch(request)
+                .catch(() => {/* prevent console warnings */});
             });
 
             it('attaches the original response object as `[HTTP_RESPONSE]`', (done) => {
@@ -742,14 +656,15 @@ describe('Response Handlers', () => {
                 }
               ];
 
-              store.expect(actions, (err) => {
+              $store.expect(actions, (err) => {
                 if (err) {
                   return done(err);
                 }
 
-                const dispatched = store.getActions();
+                const dispatched = $store.getActions();
                 const action = dispatched[dispatched.length - 1];
 
+                //noinspection JSCheckFunctionSignatures
                 expect(action)
                   .to.have.property(HTTP_RESPONSE)
                   .that.deep.includes({
@@ -764,7 +679,8 @@ describe('Response Handlers', () => {
                 done();
               });
 
-              store.dispatch(request);
+              $store.dispatch(request)
+                .catch(() => {/* prevent console warnings */});
             });
           });
 
@@ -784,7 +700,7 @@ describe('Response Handlers', () => {
                   })
                 ];
 
-                store.expect(actions, (err) => {
+                $store.expect(actions, (err) => {
                   if (err) {
                     return done(err);
                   }
@@ -799,10 +715,11 @@ describe('Response Handlers', () => {
                   done();
                 });
 
-                store.dispatch(request);
+                $store.dispatch(request)
+                  .catch(() => {/* prevent console warnings */});
               });
 
-            it('additionally provides the response object as a second argument', (done) => {
+            it('additionally provides the original response object as a second argument', (done) => {
               const actions = [
                 request,
                 requestSuccess({
@@ -812,14 +729,15 @@ describe('Response Handlers', () => {
                 })
               ];
 
-              store.expect(actions, (err) => {
+              $store.expect(actions, (err) => {
                 if (err) {
                   return done(err);
                 }
 
-                const dispatched = store.getActions();
+                const dispatched = $store.getActions();
                 const action = dispatched[dispatched.length - 1];
 
+                //noinspection JSCheckFunctionSignatures
                 expect(action)
                   .to.have.property(HTTP_RESPONSE)
                   .that.deep.includes({
@@ -834,7 +752,8 @@ describe('Response Handlers', () => {
                 done();
               });
 
-              store.dispatch(request);
+              $store.dispatch(request)
+                .catch(() => {/* prevent console warnings */});
             });
           });
         });

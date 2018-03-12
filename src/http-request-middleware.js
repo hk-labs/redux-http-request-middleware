@@ -135,32 +135,34 @@ export function httpRequestMiddleware(options) {
     action[$PROMISE] = request(options, httpRequestPayload)
       .then((res) => {
         if (handlers[res.status]) {
-          return store.dispatch(response(handlers[res.status], {
+          store.dispatch(response(handlers[res.status], {
             payload: res.body,
             response: res
           }));
         }
 
-        if (handlers.success) {
-          return store.dispatch(response(handlers.success, {
+        else if (handlers.success) {
+          store.dispatch(response(handlers.success, {
             payload: res.body,
             response: res
           }));
         }
+
+        return res;
       })
       .catch((err) => {
         if (handlers[err.status]) {
           const params = {};
           err.response && (params.response = err.response);
           err.response && err.response.body && (params.payload = err.response.body);
-          return store.dispatch(response(handlers[err.status], params));
+          store.dispatch(response(handlers[err.status], params));
         }
 
-        if (handlers.failure) {
+        else if (handlers.failure) {
           const params = { error: err };
           err.response && (params.response = err.response);
           err.response && err.response.body && (params.payload = err.response.body);
-          return store.dispatch(response(handlers.failure, params));
+          store.dispatch(response(handlers.failure, params));
         }
 
         throw err;
