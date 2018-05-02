@@ -1,3 +1,8 @@
+<a name="0.1.0-beta.5"></a>
+# [0.1.0-beta.5](https://github.com/hk-labs/redux-http-request-middleware/compare/v0.1.0-beta.4...v0.1.0-beta.5) (2018-05-02)
+
+
+
 <a name="0.1.0-beta.4"></a>
 # [0.1.0-beta.4](https://github.com/hk-labs/redux-http-request-middleware/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2018-03-12)
 
