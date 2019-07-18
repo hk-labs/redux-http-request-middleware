@@ -1,22 +1,14 @@
 {
   "presets": [
-    "react",
-    [
-      "env",
-      {
-        "modules": false
-      }
-    ],
-    "stage-2"
-  ],
-  "plugins": [
-    "transform-runtime"
+    ["@babel/env", {
+      "modules": false
+    }]
   ],
   "env": {
     "test": {
       "presets": [
-        ["env", {
-          "target": {
+        ["@babel/env", {
+          "targets": {
             "node": "current"
           }
         }]
