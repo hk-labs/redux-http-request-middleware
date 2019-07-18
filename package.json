@@ -1,6 +1,6 @@
 {
   "name": "redux-http-request-middleware",
-  "version": "1.0.0",
+  "version": "2.0.0-rc.1",
   "description": "Transparently add the HTTP request ability to your redux actions.",
   "homepage": "https://github.com/hk-labs/redux-http-request-middleware#readme",
   "keywords": [
